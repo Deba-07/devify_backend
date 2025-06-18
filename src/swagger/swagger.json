@@ -1,0 +1,176 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "DevifyX Post Scheduling API",
+    "version": "1.0.0",
+    "description": "API documentation for a backend system that allows time-based post scheduling and publishing."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000",
+      "description": "Local development server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "RegisterUser": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": { "type": "string", "example": "user@example.com" },
+          "password": { "type": "string", "example": "secret123" }
+        }
+      },
+      "LoginUser": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": { "type": "string", "example": "user@example.com" },
+          "password": { "type": "string", "example": "secret123" }
+        }
+      },
+      "Post": {
+        "type": "object",
+        "required": ["content", "scheduledTime"],
+        "properties": {
+          "content": { "type": "string", "example": "My post content" },
+          "scheduledTime": { "type": "string", "format": "date-time", "example": "2025-06-20T10:00:00Z" },
+          "recurrence": { "type": "string", "enum": ["none", "daily", "weekly"], "example": "none" }
+        }
+      }
+    }
+  },
+  "security": [{ "bearerAuth": [] }],
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "summary": "Register a new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterUser" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "User registered" },
+          "400": { "description": "Validation error" }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Login a user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginUser" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login successful" },
+          "400": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/api/posts": {
+      "post": {
+        "summary": "Create a new scheduled post",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Post" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Post created and scheduled" },
+          "400": { "description": "Validation error" }
+        }
+      }
+    },
+    "/api/posts/published": {
+      "get": {
+        "summary": "Get all published posts",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of published posts"
+          }
+        }
+      }
+    },
+    "/api/posts/{id}/status": {
+      "get": {
+        "summary": "Get the status of a post",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Post status" },
+          "404": { "description": "Post not found" }
+        }
+      }
+    },
+    "/api/posts/{id}": {
+      "put": {
+        "summary": "Update a scheduled post",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Post" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Post updated" },
+          "400": { "description": "Validation or update error" }
+        }
+      },
+      "delete": {
+        "summary": "Delete a scheduled post",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Post deleted" },
+          "404": { "description": "Post not found" }
+        }
+      }
+    }
+  }
+}
